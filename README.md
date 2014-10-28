@@ -1,6 +1,6 @@
 # ActiveRecord::JsonHasMany
 
-Instead of a many-to-many join table, serialize the ids into a JSON array.
+Instead of keeping the foreign keys on the children, or in a many-to-many join table, let's keep them in a JSON array on the parent.
 
 ## Installation
 
@@ -20,7 +20,7 @@ Or install it yourself as:
 
 ```ruby
 class Parent < ActiveRecord::Base
-  has_many_json :children, class_name: "Child"
+  has_many_json :children
 end
 ```
 
