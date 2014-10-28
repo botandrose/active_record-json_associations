@@ -27,13 +27,11 @@ class Parent < ActiveRecord::Base
 end
 ```
 
-This will create five methods:
+This will add some methods:
 
 ```ruby
 parent.child_ids = [1,2,3]
 parent.child_ids #=> [1,2,3]
-parent.child_ids_json = "[1,2,3]"
-parent.child_ids_json #=> "[1,2,3]"
 parent.children => [<Child id=1>, <Child id=2>, Child id=3>]
 ```
 

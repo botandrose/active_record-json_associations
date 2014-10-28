@@ -1,4 +1,5 @@
 require "active_record/json_has_many/version"
+require "active_record"
 require "json"
 
 module ActiveRecord
@@ -10,18 +11,6 @@ module ActiveRecord
       class_eval <<-RUBY
         def #{singularized_field}_ids
           super || []
-        end
-
-        def #{singularized_field}_ids_json
-          JSON.dump(#{singularized_field}_ids)
-        end
-
-        def #{singularized_field}_ids_json= json
-          self.#{singularized_field}_ids = JSON.load(json)
-        end
-
-        def #{singularized_field}_count
-          #{singularized_field}_ids.count
         end
 
         def #{field}
