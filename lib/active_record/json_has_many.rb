@@ -7,17 +7,17 @@ module ActiveRecord
     def json_has_many(field, class_name: nil)
       singularized_field = field.to_s.singularize.to_sym
       class_name ||= singularized_field.to_s.classify
-      serialize :"#{singularized_field}_ids", JSON
+      singularized_field_ids = :"#{singularized_field}_ids"
 
-      class_eval <<-RUBY
-        def #{singularized_field}_ids
-          super || []
-        end
+      serialize singularized_field_ids, JSON
 
-        def #{field}
-          #{class_name}.where(id: #{singularized_field}_ids)
-        end
-      RUBY
+      define_method singularized_field_ids do
+        super() || []
+      end
+
+      define_method field do
+        class_name.constantize.where(id: send(singularized_field_ids))
+      end
     end
   end
 
