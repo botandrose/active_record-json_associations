@@ -8,18 +8,26 @@ describe ActiveRecord::JsonHasMany do
       ActiveRecord::Schema.define do
         create_table :parents do |t|
           t.string :child_ids
+          t.string :fuzzy_ids
         end
 
         create_table :children do |t|
+        end
+
+        create_table :pets do |t|
         end
       end
     end
 
     class Parent < ActiveRecord::Base
-      json_has_many :children, class_name: "Child"
+      json_has_many :children
+      json_has_many :fuzzies, class_name: "Pet"
     end
 
     class Child < ActiveRecord::Base
+    end
+
+    class Pet < ActiveRecord::Base
     end
   end
  
@@ -46,6 +54,19 @@ describe ActiveRecord::JsonHasMany do
     it "finds the children by id" do
       subject.child_ids = [1,2,3]
       expect(subject.children).to eq children
+    end
+  end
+
+  context "when overriding class name" do
+    let(:pets) { [Pet.create!, Pet.create!, Pet.create!] }
+
+    it "returns an empty array when there are no children" do
+      expect(subject.fuzzies).to eq []
+    end
+
+    it "finds the children by id" do
+      subject.fuzzy_ids = [1,2,3]
+      expect(subject.fuzzies).to eq pets
     end
   end
 end

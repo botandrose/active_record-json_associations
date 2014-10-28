@@ -4,8 +4,9 @@ require "json"
 
 module ActiveRecord
   module JsonHasMany
-    def json_has_many(field, class_name:)
+    def json_has_many(field, class_name: nil)
       singularized_field = field.to_s.singularize.to_sym
+      class_name ||= singularized_field.to_s.classify
       serialize :"#{singularized_field}_ids", JSON
 
       class_eval <<-RUBY
