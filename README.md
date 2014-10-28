@@ -23,7 +23,7 @@ Or install it yourself as:
 
 ```ruby
 class Parent < ActiveRecord::Base
-  has_many_json :children
+  json_has_many :children
 end
 ```
 
