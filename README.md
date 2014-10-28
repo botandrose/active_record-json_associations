@@ -18,11 +18,8 @@ Or install it yourself as:
 
 ## Usage
 
-Extend the module into any ActiveRecord class, and then `json_has_many` will be available.
-
 ```ruby
 class Parent < ActiveRecord::Base
-  extend ActiveRecord::JsonHasMany
   has_many_json :children, class_name: "Child"
 end
 ```

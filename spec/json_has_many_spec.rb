@@ -16,7 +16,6 @@ describe ActiveRecord::JsonHasMany do
     end
 
     class Parent < ActiveRecord::Base
-      extend ActiveRecord::JsonHasMany
       json_has_many :children, class_name: "Child"
     end
 

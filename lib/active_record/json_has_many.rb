@@ -19,5 +19,7 @@ module ActiveRecord
       RUBY
     end
   end
+
+  Base.extend JsonHasMany
 end
 
