@@ -34,6 +34,10 @@ parent.child_ids #=> [1,2,3]
 parent.children => [<Child id=1>, <Child id=2>, Child id=3>]
 ```
 
+## Requirements
+
+* Ruby 2.0+
+
 ## Contributing
 
 1. Fork it ( https://github.com/[my-github-username]/active_record-json_has_many/fork )
