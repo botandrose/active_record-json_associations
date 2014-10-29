@@ -1,4 +1,5 @@
 require "active_record/json_has_many"
+require "byebug"
 
 describe ActiveRecord::JsonHasMany do
   before do
