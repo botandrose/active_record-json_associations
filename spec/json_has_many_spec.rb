@@ -8,15 +8,13 @@ describe ActiveRecord::JsonHasMany do
     silence_stream(STDOUT) do
       ActiveRecord::Schema.define do
         create_table :parents do |t|
-          t.string :child_ids
-          t.string :fuzzy_ids
+          t.text :child_ids
+          t.text :fuzzy_ids
         end
 
-        create_table :children do |t|
-        end
+        create_table :children
 
-        create_table :pets do |t|
-        end
+        create_table :pets
       end
     end
 
@@ -54,6 +52,11 @@ describe ActiveRecord::JsonHasMany do
 
     it "finds the children by id" do
       subject.child_ids = [1,2,3]
+      expect(subject.children).to eq children
+    end
+
+    it "is an accessor" do
+      subject.children = children
       expect(subject.children).to eq children
     end
   end

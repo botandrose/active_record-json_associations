@@ -5,34 +5,32 @@
 
 Instead of keeping the foreign keys on the children, or in a many-to-many join table, let's keep them in a JSON array on the parent.
 
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'active_record-json_has_many'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install active_record-json_has_many
-
 ## Usage
 
 ```ruby
+require "active_record/json_has_many"
+
+ActiveRecord::Schema.define do
+  create_table :parents do |t|
+    t.text :child_ids
+  end
+
+  create_table :children
+end
+
 class Parent < ActiveRecord::Base
   json_has_many :children
 end
 ```
 
-This will add some methods:
+This will add some familiar `has_many`-style methods:
 
 ```ruby
+parent.children = [Child.create!, Child.create!, Child.create!]
+parent.children #=> [#<Child id: 1>, #<Child id: 2>, #<Child id: 3>]
+
 parent.child_ids = [1,2,3]
 parent.child_ids #=> [1,2,3]
-parent.children => [<Child id=1>, <Child id=2>, Child id=3>]
 ```
 
 ## Requirements
