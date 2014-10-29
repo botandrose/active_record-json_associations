@@ -61,6 +61,19 @@ describe ActiveRecord::JsonHasMany do
     end
   end
 
+  describe "#children?" do
+    let(:children) { [Child.create!, Child.create!, Child.create!] }
+
+    it "returns false when there are no children" do
+      expect(subject.children?).to be_falsey
+    end
+
+    it "returns true when there are children" do
+      subject.children = children
+      expect(subject.children?).to be_truthy
+    end
+  end
+
   context "when overriding class name" do
     let(:pets) { [Pet.create!, Pet.create!, Pet.create!] }
 

@@ -10,6 +10,7 @@ module ActiveRecord
       one_ids_equals = :"#{one_ids}="
       class_name ||= one.classify
       many_equals = :"#{many}="
+      many_eh = :"#{many}?"
 
       serialize one_ids, JSON
 
@@ -24,6 +25,10 @@ module ActiveRecord
 
         define_method many_equals do |collection|
           send one_ids_equals, collection.map(&:id)
+        end
+
+        define_method many_eh do
+          send(one_ids).any?
         end
       }
     end

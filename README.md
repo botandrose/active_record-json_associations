@@ -26,11 +26,15 @@ end
 This will add some familiar `has_many`-style methods:
 
 ```ruby
+parent.children? #=> false
+
 parent.children = [Child.create!, Child.create!, Child.create!]
 parent.children #=> [#<Child id: 1>, #<Child id: 2>, #<Child id: 3>]
 
-parent.child_ids = [1,2,3]
-parent.child_ids #=> [1,2,3]
+parent.child_ids = [1,2]
+parent.child_ids #=> [1,2]
+
+parent.children? #=> true
 ```
 
 ## Requirements
