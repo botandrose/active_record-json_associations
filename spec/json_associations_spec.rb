@@ -98,28 +98,30 @@ describe ActiveRecord::JsonAssociations do
   end
 
   describe ".where_json_array_includes" do
+    let(:child) { Child.create! }
+
+    subject do
+      Parent.where_json_array_includes(child_ids: child.id)
+    end
+
     it "finds records with the specified id in the json array" do
-      child = Child.create!
       parent = Parent.create(children: [child])
-      Parent.where_json_array_includes(child_ids: child.id).should == [parent]
+      expect(subject).to eq [parent]
     end
 
     it "finds records with the specified id in the json array" do
-      child = Child.create!
       parent = Parent.create(children: [child, Child.create!])
-      Parent.where_json_array_includes(child_ids: child.id).should == [parent]
+      expect(subject).to eq [parent]
     end
 
     it "finds records with the specified id in the json array" do
-      child = Child.create!
       parent = Parent.create(children: [Child.create!, child, Child.create!])
-      Parent.where_json_array_includes(child_ids: child.id).should == [parent]
+      expect(subject).to eq [parent]
     end
 
     it "finds records with the specified id in the json array" do
-      child = Child.create!
       parent = Parent.create(children: [Child.create!, child])
-      Parent.where_json_array_includes(child_ids: child.id).should == [parent]
+      expect(subject).to eq [parent]
     end
   end
 end
