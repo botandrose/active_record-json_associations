@@ -96,5 +96,31 @@ describe ActiveRecord::JsonHasMany do
       expect(subject.fuzzies).to eq pets
     end
   end
+
+  describe ".where_json_array_includes" do
+    it "finds records with the specified id in the json array" do
+      child = Child.create!
+      parent = Parent.create(children: [child])
+      Parent.where_json_array_includes(child_ids: child.id).should == [parent]
+    end
+
+    it "finds records with the specified id in the json array" do
+      child = Child.create!
+      parent = Parent.create(children: [child, Child.create!])
+      Parent.where_json_array_includes(child_ids: child.id).should == [parent]
+    end
+
+    it "finds records with the specified id in the json array" do
+      child = Child.create!
+      parent = Parent.create(children: [Child.create!, child, Child.create!])
+      Parent.where_json_array_includes(child_ids: child.id).should == [parent]
+    end
+
+    it "finds records with the specified id in the json array" do
+      child = Child.create!
+      parent = Parent.create(children: [Child.create!, child])
+      Parent.where_json_array_includes(child_ids: child.id).should == [parent]
+    end
+  end
 end
 

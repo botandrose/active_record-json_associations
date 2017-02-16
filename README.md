@@ -37,6 +37,19 @@ parent.child_ids #=> [1,2]
 parent.children? #=> true
 ```
 
+It also adds a scope class method for implementing the inverse relationship on the child:
+```ruby
+class Child
+  def parents
+    Parent.where_json_array_includes(child_ids: id)
+  end
+end
+
+child = Child.create!
+parent = Parent.create children: [child]
+child.parents == [parent] #=> true
+```
+
 ## Requirements
 
 * Ruby 2.0+

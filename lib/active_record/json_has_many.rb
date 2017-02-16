@@ -35,7 +35,10 @@ module ActiveRecord
 
     def where_json_array_includes pair
       field, value = *pair.to_a.first
-      where("#{field} RLIKE '[[:<:]]#{value}[[:>:]]'")
+      where("#{field} LIKE '[#{value}]'").or(
+        where("#{field} LIKE '[#{value},%'")).or(
+        where("#{field} LIKE '%,#{value},%'")).or(
+        where("#{field} LIKE '%,#{value}]'"))
     end
   end
 
