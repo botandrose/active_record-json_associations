@@ -32,6 +32,11 @@ module ActiveRecord
         end
       }
     end
+
+    def where_json_array_includes pair
+      field, value = *pair.to_a.first
+      where("#{field} RLIKE '[[:<:]]#{value}[[:>:]]'")
+    end
   end
 
   Base.extend JsonHasMany
