@@ -19,7 +19,7 @@ ActiveRecord::Schema.define do
 end
 
 class Parent < ActiveRecord::Base
-  json_has_many :children
+  belongs_to_many :children
 end
 ```
 
@@ -37,12 +37,11 @@ parent.child_ids #=> [1,2]
 parent.children? #=> true
 ```
 
-It also adds a scope class method for implementing the inverse relationship on the child:
+It also adds an `json_foreign_key` option to `has_many` for specifying that the foreign keys are in a json array.
+
 ```ruby
 class Child
-  def parents
-    Parent.where_json_array_includes(child_ids: id)
-  end
+  has_many :parents, json_foreign_key: :child_ids
 end
 
 child = Child.create!
