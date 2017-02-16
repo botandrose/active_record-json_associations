@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'active_record/json_has_many/version'
+require 'active_record/json_associations/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "active_record-json_has_many"
-  spec.version       = ActiveRecord::JsonHasMany::VERSION
+  spec.name          = "active_record-json_associations"
+  spec.version       = ActiveRecord::JsonAssociations::VERSION
   spec.authors       = ["Micah Geisel"]
   spec.email         = ["micah@botandrose.com"]
   spec.summary       = %q{Instead of a many-to-many join table, serialize the ids into a JSON array.}
   spec.description   = %q{Instead of a many-to-many join table, serialize the ids into a JSON array.}
-  spec.homepage      = "https://github.com/botandrose/active_record-json_has_many"
+  spec.homepage      = "https://github.com/botandrose/active_record-json_associations"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

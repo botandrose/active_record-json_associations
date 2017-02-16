@@ -1,9 +1,8 @@
-require "active_record/json_has_many/version"
 require "active_record"
 require "json"
 
 module ActiveRecord
-  module JsonHasMany
+  module JsonAssociations
     def json_has_many(many, class_name: nil)
       one = many.to_s.singularize
       one_ids = :"#{one}_ids"
@@ -42,6 +41,6 @@ module ActiveRecord
     end
   end
 
-  Base.extend JsonHasMany
+  Base.extend JsonAssociations
 end
 

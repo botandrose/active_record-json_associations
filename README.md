@@ -1,14 +1,14 @@
-# ActiveRecord::JsonHasMany
+# ActiveRecord::JsonAssociations
 
-[![Build Status](https://travis-ci.org/botandrose/active_record-json_has_many.svg)](https://travis-ci.org/botandrose/active_record-json_has_many)
-[![Code Climate](https://codeclimate.com/github/botandrose/active_record-json_has_many/badges/gpa.svg)](https://codeclimate.com/github/botandrose/active_record-json_has_many)
+[![Build Status](https://travis-ci.org/botandrose/active_record-json_associations.svg)](https://travis-ci.org/botandrose/active_record-json_associations)
+[![Code Climate](https://codeclimate.com/github/botandrose/active_record-json_associations/badges/gpa.svg)](https://codeclimate.com/github/botandrose/active_record-json_associations)
 
 Instead of keeping the foreign keys on the children, or in a many-to-many join table, let's keep them in a JSON array on the parent.
 
 ## Usage
 
 ```ruby
-require "active_record/json_has_many"
+require "active_record/json_associations"
 
 ActiveRecord::Schema.define do
   create_table :parents do |t|
@@ -52,11 +52,11 @@ child.parents == [parent] #=> true
 
 ## Requirements
 
-* Ruby 2.0+
+* ActiveRecord 5.0+
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/active_record-json_has_many/fork )
+1. Fork it ( https://github.com/botandrose/active_record-json_associations/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)

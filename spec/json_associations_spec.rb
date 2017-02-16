@@ -1,4 +1,4 @@
-require "active_record/json_has_many"
+require "active_record/json_associations"
 require "byebug"
 
 def silence_stream(stream)
@@ -11,7 +11,7 @@ ensure
   old_stream.close
 end
 
-describe ActiveRecord::JsonHasMany do
+describe ActiveRecord::JsonAssociations do
   before do
     ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
 

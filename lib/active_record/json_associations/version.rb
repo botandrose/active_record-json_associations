@@ -1,5 +1,5 @@
 module ActiveRecord
-  module JsonHasMany
+  module JsonAssociations
     VERSION = "0.5.0"
   end
 end
