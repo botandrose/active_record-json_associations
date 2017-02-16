@@ -1,6 +1,16 @@
 require "active_record/json_has_many"
 require "byebug"
 
+def silence_stream(stream)
+  old_stream = stream.dup
+  stream.reopen "/dev/null"
+  stream.sync = true
+  yield
+ensure
+  stream.reopen(old_stream)
+  old_stream.close
+end
+
 describe ActiveRecord::JsonHasMany do
   before do
     ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
