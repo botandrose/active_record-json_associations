@@ -23,7 +23,7 @@ describe ActiveRecord::JsonAssociations do
     end
 
     class Child < ActiveRecord::Base
-      has_many :parents, json_foreign_key: :child_ids
+      has_many :parents, json_foreign_key: true
     end
 
     class Pet < ActiveRecord::Base
@@ -90,7 +90,7 @@ describe ActiveRecord::JsonAssociations do
     end
   end
 
-  describe ".has_many :parents, json_foreign_key: :child_ids" do
+  describe ".has_many :parents, json_foreign_key: true" do
     subject { Child.create! }
 
     let(:parents) { [Parent.create!, Parent.create!, Parent.create!] }
@@ -142,6 +142,74 @@ describe ActiveRecord::JsonAssociations do
         it "at the end of the json array" do
           parent = Parent.create(children: [Child.create!, child])
           expect(child.parents).to eq [parent]
+        end
+      end
+    end
+
+    describe "#parents?" do
+      it "returns false when there are no parents" do
+        expect(subject.parents?).to be_falsey
+      end
+
+      it "returns true when there are parents" do
+        subject.parents = parents
+        expect(subject.parents?).to be_truthy
+      end
+    end
+  end
+
+  describe ".has_many :parents, json_foreign_key: :fuzzy_ids" do
+    subject { Pet.create! }
+
+    let(:parents) { [Parent.create!, Parent.create!, Parent.create!] }
+
+    describe "#parent_ids" do
+      it "is empty by default" do
+        expect(subject.parent_ids).to eq []
+      end
+
+      it "is an accessor" do
+        subject.parent_ids = parents.map(&:id)
+        expect(subject.parent_ids).to eq parents.map(&:id)
+      end
+    end
+
+    describe "#parents" do
+      it "returns an empty array when there are no parents" do
+        expect(subject.parents).to eq []
+      end
+
+      it "finds the parents by id" do
+        subject.parent_ids = parents.map(&:id)
+        expect(subject.parents).to eq parents
+      end
+
+      it "is an accessor" do
+        subject.parents = parents
+        expect(subject.parents).to eq parents
+      end
+
+      context "finds records with the specified id" do
+        let(:pet) { Pet.create! }
+
+        it "as the whole json array" do
+          parent = Parent.create(fuzzies: [pet])
+          expect(pet.parents).to eq [parent]
+        end
+
+        it "at the beginning of the json array" do
+          parent = Parent.create(fuzzies: [pet, Pet.create!])
+          expect(pet.parents).to eq [parent]
+        end
+
+        it "in the middle of the json array" do
+          parent = Parent.create(fuzzies: [Pet.create!, pet, Pet.create!])
+          expect(pet.parents).to eq [parent]
+        end
+
+        it "at the end of the json array" do
+          parent = Parent.create(fuzzies: [Pet.create!, pet])
+          expect(pet.parents).to eq [parent]
         end
       end
     end

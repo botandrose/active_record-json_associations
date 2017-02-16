@@ -41,7 +41,7 @@ It also adds an `json_foreign_key` option to `has_many` for specifying that the 
 
 ```ruby
 class Child
-  has_many :parents, json_foreign_key: :child_ids
+  has_many :parents, json_foreign_key: true # infers :child_ids, but can be overridden
 end
 
 child = Child.create!

@@ -42,7 +42,6 @@ module ActiveRecord
         scope   = nil
       end
 
-      foreign_key = options[:json_foreign_key]
       one = many.to_s.singularize
       class_name ||= one.classify
       klass = class_name.constantize
@@ -51,6 +50,9 @@ module ActiveRecord
       one_ids_equals = :"#{one_ids}="
       many_equals = :"#{many}="
       many_eh = :"#{many}?"
+
+      foreign_key = options[:json_foreign_key]
+      foreign_key = :"#{model_name.singular}_ids" if foreign_key == true
 
       include Module.new {
         define_method one_ids do
