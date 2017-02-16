@@ -1,15 +1,4 @@
 require "active_record/json_associations"
-require "byebug"
-
-def silence_stream(stream)
-  old_stream = stream.dup
-  stream.reopen "/dev/null"
-  stream.sync = true
-  yield
-ensure
-  stream.reopen(old_stream)
-  old_stream.close
-end
 
 describe ActiveRecord::JsonAssociations do
   before do
@@ -29,99 +18,143 @@ describe ActiveRecord::JsonAssociations do
     end
 
     class Parent < ActiveRecord::Base
-      json_has_many :children
-      json_has_many :fuzzies, class_name: "Pet"
+      belongs_to_many :children
+      belongs_to_many :fuzzies, class_name: "Pet"
     end
 
     class Child < ActiveRecord::Base
+      has_many :parents, json_foreign_key: :child_ids
     end
 
     class Pet < ActiveRecord::Base
+      has_many :parents, json_foreign_key: :fuzzy_ids
     end
   end
  
-  subject { Parent.new }
+  describe ".belongs_to_many :children" do
+    subject { Parent.new }
 
-  describe "#child_ids" do
-    it "is empty by default" do
-      expect(subject.child_ids).to eq []
+    describe "#child_ids" do
+      it "is empty by default" do
+        expect(subject.child_ids).to eq []
+      end
+
+      it "is an accessor" do
+        subject.child_ids = [1,2,3]
+        expect(subject.child_ids).to eq [1,2,3]
+      end
     end
 
-    it "is an accessor" do
-      subject.child_ids = [1,2,3]
-      expect(subject.child_ids).to eq [1,2,3]
+    describe "#children" do
+      let(:children) { [Child.create!, Child.create!, Child.create!] }
+
+      it "returns an empty array when there are no children" do
+        expect(subject.children).to eq []
+      end
+
+      it "finds the children by id" do
+        subject.child_ids = [1,2,3]
+        expect(subject.children).to eq children
+      end
+
+      it "is an accessor" do
+        subject.children = children
+        expect(subject.children).to eq children
+      end
+    end
+
+    describe "#children?" do
+      let(:children) { [Child.create!, Child.create!, Child.create!] }
+
+      it "returns false when there are no children" do
+        expect(subject.children?).to be_falsey
+      end
+
+      it "returns true when there are children" do
+        subject.children = children
+        expect(subject.children?).to be_truthy
+      end
+    end
+
+    context "when overriding class name" do
+      let(:pets) { [Pet.create!, Pet.create!, Pet.create!] }
+
+      it "returns an empty array when there are no children" do
+        expect(subject.fuzzies).to eq []
+      end
+
+      it "finds the children by id" do
+        subject.fuzzy_ids = [1,2,3]
+        expect(subject.fuzzies).to eq pets
+      end
     end
   end
 
-  describe "#children" do
-    let(:children) { [Child.create!, Child.create!, Child.create!] }
+  describe ".has_many :parents, json_foreign_key: :child_ids" do
+    subject { Child.create! }
 
-    it "returns an empty array when there are no children" do
-      expect(subject.children).to eq []
+    let(:parents) { [Parent.create!, Parent.create!, Parent.create!] }
+
+    describe "#parent_ids" do
+      it "is empty by default" do
+        expect(subject.parent_ids).to eq []
+      end
+
+      it "is an accessor" do
+        subject.parent_ids = parents.map(&:id)
+        expect(subject.parent_ids).to eq parents.map(&:id)
+      end
     end
 
-    it "finds the children by id" do
-      subject.child_ids = [1,2,3]
-      expect(subject.children).to eq children
+    describe "#parents" do
+      it "returns an empty array when there are no parents" do
+        expect(subject.parents).to eq []
+      end
+
+      it "finds the children by id" do
+        subject.parent_ids = parents.map(&:id)
+        expect(subject.parents).to eq parents
+      end
+
+      it "is an accessor" do
+        subject.parents = parents
+        expect(subject.parents).to eq parents
+      end
+
+      context "finds records with the specified id" do
+        let(:child) { Child.create! }
+
+        it "as the whole json array" do
+          parent = Parent.create(children: [child])
+          expect(child.parents).to eq [parent]
+        end
+
+        it "at the beginning of the json array" do
+          parent = Parent.create(children: [child, Child.create!])
+          expect(child.parents).to eq [parent]
+        end
+
+        it "in the middle of the json array" do
+          parent = Parent.create(children: [Child.create!, child, Child.create!])
+          expect(child.parents).to eq [parent]
+        end
+
+        it "at the end of the json array" do
+          parent = Parent.create(children: [Child.create!, child])
+          expect(child.parents).to eq [parent]
+        end
+      end
     end
 
-    it "is an accessor" do
-      subject.children = children
-      expect(subject.children).to eq children
-    end
-  end
+    describe "#parents?" do
+      it "returns false when there are no parents" do
+        expect(subject.parents?).to be_falsey
+      end
 
-  describe "#children?" do
-    let(:children) { [Child.create!, Child.create!, Child.create!] }
-
-    it "returns false when there are no children" do
-      expect(subject.children?).to be_falsey
-    end
-
-    it "returns true when there are children" do
-      subject.children = children
-      expect(subject.children?).to be_truthy
-    end
-  end
-
-  context "when overriding class name" do
-    let(:pets) { [Pet.create!, Pet.create!, Pet.create!] }
-
-    it "returns an empty array when there are no children" do
-      expect(subject.fuzzies).to eq []
-    end
-
-    it "finds the children by id" do
-      subject.fuzzy_ids = [1,2,3]
-      expect(subject.fuzzies).to eq pets
-    end
-  end
-
-  describe ".where_json_array_includes" do
-    let(:child) { Child.create! }
-
-    subject do
-      Parent.where_json_array_includes(child_ids: child.id)
-    end
-
-    it "finds records with the specified id in the json array" do
-      parent = Parent.create(children: [child])
-      expect(subject).to eq [parent]
-    end
-
-    it "finds records with the specified id in the json array" do
-      parent = Parent.create(children: [child, Child.create!])
-      expect(subject).to eq [parent]
-    end
-
-    it "finds records with the specified id in the json array" do
-      parent = Parent.create(children: [Child.create!, child, Child.create!])
-      expect(subject).to eq [parent]
-    end
-
-    it "finds records with the specified id in the json array" do
-      parent = Parent.create(children: [Child.create!, child])
-      expect(subject).to eq [parent]
+      it "returns true when there are parents" do
+        subject.parents = parents
+        expect(subject.parents?).to be_truthy
+      end
     end
   end
 end
