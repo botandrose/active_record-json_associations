@@ -7,9 +7,10 @@ module ActiveRecord
       one = many.to_s.singularize
       one_ids = :"#{one}_ids"
       one_ids_equals = :"#{one_ids}="
-      class_name ||= one.classify
       many_equals = :"#{many}="
       many_eh = :"#{many}?"
+
+      class_name ||= one.classify
 
       serialize one_ids, JSON
 
@@ -19,7 +20,8 @@ module ActiveRecord
         end
 
         define_method many do
-          class_name.constantize.where(id: send(one_ids))
+          klass = class_name.constantize
+          klass.where(id: send(one_ids))
         end
 
         define_method many_equals do |collection|
@@ -43,13 +45,12 @@ module ActiveRecord
       end
 
       one = many.to_s.singularize
-      class_name ||= one.classify
-      klass = class_name.constantize
-
       one_ids = :"#{one}_ids"
       one_ids_equals = :"#{one_ids}="
       many_equals = :"#{many}="
       many_eh = :"#{many}?"
+
+      class_name = options[:class_name] || one.classify
 
       foreign_key = options[:json_foreign_key]
       foreign_key = :"#{model_name.singular}_ids" if foreign_key == true
@@ -60,10 +61,12 @@ module ActiveRecord
         end
 
         define_method one_ids_equals do |ids|
+          klass = class_name.constantize
           send many_equals, klass.find(ids)
         end
 
         define_method many do
+          klass = class_name.constantize
           klass.where("#{foreign_key} LIKE '[#{id}]'").or(
             klass.where("#{foreign_key} LIKE '[#{id},%'")).or(
             klass.where("#{foreign_key} LIKE '%,#{id},%'")).or(
