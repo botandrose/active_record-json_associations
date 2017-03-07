@@ -45,6 +45,13 @@ describe ActiveRecord::JsonAssociations do
       end
     end
 
+    describe "#child_ids=" do
+      it "normalizes to integers" do
+        subject.child_ids = ["1",2,"3"]
+        expect(subject.child_ids).to eq [1,2,3]
+      end
+    end
+
     describe "#children" do
       let(:children) { [Child.create!, Child.create!, Child.create!] }
 

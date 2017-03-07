@@ -19,6 +19,10 @@ module ActiveRecord
           super() || []
         end
 
+        define_method one_ids_equals do |ids|
+          super Array(ids).map(&:to_i)
+        end
+
         define_method many do
           klass = class_name.constantize
           klass.where(id: send(one_ids))
