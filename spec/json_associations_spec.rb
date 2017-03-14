@@ -28,6 +28,11 @@ describe ActiveRecord::JsonAssociations do
 
     class Pet < ActiveRecord::Base
       has_many :parents, json_foreign_key: :fuzzy_ids
+
+      # ensure that regular .has_many invocations still work
+      has_many :fallback_parents
+      has_many :fallback_parents_with_options, class_name: "Pet"
+      has_many :fallback_parents_with_scope, -> { order(:id) }
     end
   end
  
