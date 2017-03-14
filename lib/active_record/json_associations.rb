@@ -25,7 +25,7 @@ module ActiveRecord
 
         define_method many do
           klass = class_name.constantize
-          klass.where(id: send(one_ids))
+          klass.where(klass.primary_key => send(one_ids))
         end
 
         define_method many_equals do |collection|
