@@ -20,7 +20,7 @@ module ActiveRecord
         end
 
         define_method one_ids_equals do |ids|
-          super Array(ids).map(&:to_i)
+          super Array(ids).select(&:present?).map(&:to_i)
         end
 
         define_method many do

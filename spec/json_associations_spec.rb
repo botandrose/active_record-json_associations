@@ -55,6 +55,11 @@ describe ActiveRecord::JsonAssociations do
         subject.child_ids = ["1",2,"3"]
         expect(subject.child_ids).to eq [1,2,3]
       end
+
+      it "ignores empty strings" do
+        subject.child_ids = ["","1","2","3"]
+        expect(subject.child_ids).to eq [1,2,3]
+      end
     end
 
     describe "#children" do
