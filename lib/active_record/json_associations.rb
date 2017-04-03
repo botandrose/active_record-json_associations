@@ -81,6 +81,7 @@ module ActiveRecord
         define_method many_equals do |collection|
           collection.each do |record|
             new_id_array = Array(record.send(foreign_key)) | [id]
+            raise "FIXME: Cannot assign during creation, because no id has yet been reified." if new_id_array.any?(&:nil?)
             record.update foreign_key => new_id_array
           end
         end
