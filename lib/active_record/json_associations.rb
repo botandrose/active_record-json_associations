@@ -66,7 +66,8 @@ module ActiveRecord
 
         define_method one_ids_equals do |ids|
           klass = class_name.constantize
-          send many_equals, klass.find(ids)
+          normalized_ids = Array(ids).select(&:present?).map(&:to_i)
+          send many_equals, klass.find(normalized_ids)
         end
 
         define_method many do

@@ -123,6 +123,20 @@ describe ActiveRecord::JsonAssociations do
       end
     end
 
+    describe "#parent_ids=" do
+      before { parents } # ensure parents exist
+
+      it "normalizes to integers" do
+        subject.parent_ids = ["1",2,"3"]
+        expect(subject.parent_ids).to eq [1,2,3]
+      end
+
+      it "ignores empty strings" do
+        subject.parent_ids = ["","1","2","3"]
+        expect(subject.parent_ids).to eq [1,2,3]
+      end
+    end
+
     describe "#parents" do
       it "returns an empty array when there are no parents" do
         expect(subject.parents).to eq []
