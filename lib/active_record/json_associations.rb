@@ -25,7 +25,16 @@ module ActiveRecord
 
         define_method many do
           klass = class_name.constantize
-          klass.where(klass.primary_key => send(one_ids))
+          scope = klass.all
+
+          ids = send(one_ids)
+          scope.where!(klass.primary_key => ids)
+
+          fragments = []
+          fragments += ["#{klass.primary_key} NOT IN (#{ids.map(&:to_s).join(",")})"] if ids.any?
+          fragments += ids.reverse.map { |id| "#{klass.primary_key}=#{id}" }
+          order_by_ids = fragments.join(", ")
+          scope.order!(order_by_ids)
         end
 
         define_method many_equals do |collection|

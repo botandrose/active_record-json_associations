@@ -74,6 +74,11 @@ describe ActiveRecord::JsonAssociations do
         expect(subject.children).to eq children
       end
 
+      it "finds the children by id order" do
+        subject.child_ids = [3,2,1]
+        expect(subject.children).to eq children.reverse
+      end
+
       it "is an accessor" do
         subject.children = children
         expect(subject.children).to eq children
