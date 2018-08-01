@@ -34,7 +34,7 @@ module ActiveRecord
           fragments += ["#{klass.primary_key} NOT IN (#{ids.map(&:to_s).join(",")})"] if ids.any?
           fragments += ids.reverse.map { |id| "#{klass.primary_key}=#{id}" }
           order_by_ids = fragments.join(", ")
-          scope.order!(order_by_ids)
+          scope.order!(Arel.sql(order_by_ids))
         end
 
         define_method many_equals do |collection|
