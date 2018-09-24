@@ -49,7 +49,7 @@ module ActiveRecord
       }
     end
 
-    def has_many many, scope = nil, options = {}, &extension
+    def has_many many, scope = nil, **options, &extension
       unless (scope.is_a?(Hash) && scope[:json_foreign_key]) || (options.is_a?(Hash) && options[:json_foreign_key])
         return super
       end
