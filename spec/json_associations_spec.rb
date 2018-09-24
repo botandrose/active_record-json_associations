@@ -48,6 +48,13 @@ describe ActiveRecord::JsonAssociations do
         subject.child_ids = [1,2,3]
         expect(subject.child_ids).to eq [1,2,3]
       end
+
+      it "can be pushed to" do
+        subject.child_ids << 1
+        subject.child_ids << 2
+        subject.child_ids << 3
+        expect(subject.child_ids).to eq [1,2,3]
+      end
     end
 
     describe "#child_ids=" do

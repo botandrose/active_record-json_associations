@@ -16,7 +16,9 @@ module ActiveRecord
 
       include Module.new {
         define_method one_ids do
-          super() || []
+          super().tap do |value|
+            return send(one_ids_equals, []) if value.nil?
+          end
         end
 
         define_method one_ids_equals do |ids|
