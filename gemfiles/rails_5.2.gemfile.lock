@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    active_record-json_associations (0.6.10)
+    active_record-json_associations (0.6.11)
       activerecord
 
 GEM
