@@ -39,6 +39,32 @@ describe ActiveRecord::JsonAssociations do
   describe ".belongs_to_many :children" do
     subject { Parent.new }
 
+    describe ".child_ids_including" do
+      context "finds records with the specified id" do
+        let(:child) { Child.create! }
+
+        it "as the whole json array" do
+          parent = Parent.create(children: [child])
+          expect(Parent.child_ids_including(child.id)).to eq [parent]
+        end
+
+        it "at the beginning of the json array" do
+          parent = Parent.create(children: [child, Child.create!])
+          expect(Parent.child_ids_including(child.id)).to eq [parent]
+        end
+
+        it "in the middle of the json array" do
+          parent = Parent.create(children: [Child.create!, child, Child.create!])
+          expect(Parent.child_ids_including(child.id)).to eq [parent]
+        end
+
+        it "at the end of the json array" do
+          parent = Parent.create(children: [Child.create!, child])
+          expect(Parent.child_ids_including(child.id)).to eq [parent]
+        end
+      end
+    end
+
     describe "#child_ids" do
       it "is empty by default" do
         expect(subject.child_ids).to eq []

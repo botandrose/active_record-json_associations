@@ -37,6 +37,12 @@ parent.child_ids #=> [1,2]
 parent.children? #=> true
 ```
 
+And a scope method for finding records assocatied with an id:
+
+```ruby
+Parent.child_ids_including(2) # => [<Parent child_ids: [1,2,3]>]
+```
+
 It also adds an `json_foreign_key` option to `has_many` for specifying that the foreign keys are in a json array.
 
 ```ruby

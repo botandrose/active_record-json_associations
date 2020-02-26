@@ -3,6 +3,14 @@ require "json"
 
 module ActiveRecord
   module JsonAssociations
+    FIELD_INCLUDE_SCOPE_BUILDER_PROC = proc do |context, field, id|
+      context.where("#{field}='[#{id}]'").or(
+        context.where("#{field} LIKE '[#{id},%'")).or(
+          context.where("#{field} LIKE '%,#{id},%'")).or(
+            context.where("#{field} LIKE '%,#{id}]'"))
+    end
+    private_constant :FIELD_INCLUDE_SCOPE_BUILDER_PROC
+
     def belongs_to_many(many, class_name: nil)
       one = many.to_s.singularize
       one_ids = :"#{one}_ids"
@@ -13,6 +21,13 @@ module ActiveRecord
       class_name ||= one.classify
 
       serialize one_ids, JSON
+
+      extend Module.new {
+        define_method :"#{one_ids}_including" do |id|
+          raise "can't query for a record that does not have an id!" if id.blank?
+          FIELD_INCLUDE_SCOPE_BUILDER_PROC.call(self, one_ids, id)
+        end
+      }
 
       include Module.new {
         define_method one_ids do
@@ -83,10 +98,7 @@ module ActiveRecord
 
         define_method many do
           klass = class_name.constantize
-          klass.where("#{foreign_key} LIKE '[#{id}]'").or(
-            klass.where("#{foreign_key} LIKE '[#{id},%'")).or(
-            klass.where("#{foreign_key} LIKE '%,#{id},%'")).or(
-            klass.where("#{foreign_key} LIKE '%,#{id}]'"))
+          FIELD_INCLUDE_SCOPE_BUILDER_PROC.call(klass, foreign_key, id)
         end
 
         define_method many_equals do |collection|
