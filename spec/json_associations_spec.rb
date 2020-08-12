@@ -63,6 +63,71 @@ describe ActiveRecord::JsonAssociations do
           expect(Parent.child_ids_including(child.id)).to eq [parent]
         end
       end
+
+      context "finds records including any of the specified array of ids" do
+        let(:peter) { Child.create! }
+        let(:paul) { Child.create! }
+
+        it "both as the whole json array" do
+          parent = Parent.create(children: [peter, paul])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "one as the whole json array" do
+          parent = Parent.create(children: [peter])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "the other as the whole json array" do
+          parent = Parent.create(children: [paul])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "both at the beginning of the json array" do
+          parent = Parent.create(children: [peter, paul, Child.create!])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "one at the beginning of the json array" do
+          parent = Parent.create(children: [peter, Child.create!])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "the other at the beginning of the json array" do
+          parent = Parent.create(children: [paul, Child.create!])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "both in the middle of the json array" do
+          parent = Parent.create(children: [Child.create!, peter, paul, Child.create!])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "one in the middle of the json array" do
+          parent = Parent.create(children: [Child.create!, peter, Child.create!])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "the other in the middle of the json array" do
+          parent = Parent.create(children: [Child.create!, paul, Child.create!])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "both at the end of the json array" do
+          parent = Parent.create(children: [Child.create!, peter, paul])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "one at the end of the json array" do
+          parent = Parent.create(children: [Child.create!, peter])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+
+        it "the other at the end of the json array" do
+          parent = Parent.create(children: [Child.create!, paul])
+          expect(Parent.child_ids_including([peter.id, paul.id])).to eq [parent]
+        end
+      end
     end
 
     describe "#child_ids" do
