@@ -3,15 +3,11 @@ require "json"
 
 module ActiveRecord
   module JsonAssociations
-    FIELD_INCLUDE_SCOPE_BUILDER_PROC = proc do |context, field, ids|
-      Array(ids).inject(context) do |context, id|
-        context.or(
-          context.where("#{field}='[#{id}]'").or(
-            context.where("#{field} LIKE '[#{id},%'")).or(
-              context.where("#{field} LIKE '%,#{id},%'")).or(
-                context.where("#{field} LIKE '%,#{id}]'"))
-        )
-      end
+    FIELD_INCLUDE_SCOPE_BUILDER_PROC = proc do |context, field, id|
+      context.where("#{field}='[#{id}]'").or(
+        context.where("#{field} LIKE '[#{id},%'")).or(
+          context.where("#{field} LIKE '%,#{id},%'")).or(
+            context.where("#{field} LIKE '%,#{id}]'"))
     end
     private_constant :FIELD_INCLUDE_SCOPE_BUILDER_PROC
 
@@ -27,9 +23,15 @@ module ActiveRecord
       serialize one_ids, JSON
 
       extend Module.new {
-        define_method :"#{one_ids}_including" do |ids|
-          raise "can't query for a record that does not have an id!" if ids.blank?
-          FIELD_INCLUDE_SCOPE_BUILDER_PROC.call(self, one_ids, ids)
+        define_method :"#{one_ids}_including" do |id|
+          raise "can't query for a record that does not have an id!" if id.blank?
+          if id.is_a?(Hash)
+            Array(id[:any]).inject(none) do |context, id|
+              context.or(FIELD_INCLUDE_SCOPE_BUILDER_PROC.call(self, one_ids, id))
+            end
+          else
+            FIELD_INCLUDE_SCOPE_BUILDER_PROC.call(self, one_ids, id)
+          end
         end
       }
 
