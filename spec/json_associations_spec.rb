@@ -144,16 +144,29 @@ describe ActiveRecord::JsonAssociations do
         Time.zone = old_zone
       end
 
-      it "touches associated records when touch option is true" do
-        old_time = 1.year.ago.round
-        new_time = 1.second.ago.round
+      let(:old_time) { 1.year.ago.round }
+      let(:new_time) { 1.second.ago.round }
+
+      around do |example|
         Timecop.freeze(new_time) do
-          children = [Child.create!(updated_at: old_time), Child.create!(updated_at: old_time)]
-          fuzzies = [Pet.create!(updated_at: old_time), Pet.create!(updated_at: old_time)]
-          parent = Parent.create!(children: children, fuzzies: fuzzies)
-          expect(children.each(&:reload).map(&:updated_at)).to eq [new_time, new_time]
-          expect(fuzzies.each(&:reload).map(&:updated_at)).to eq [old_time, old_time]
+          example.run
         end
+      end
+
+      it "touches associated records" do
+        children = [Child.create!(updated_at: old_time), Child.create!(updated_at: old_time)]
+        fuzzies = [Pet.create!(updated_at: old_time), Pet.create!(updated_at: old_time)]
+        parent = Parent.create!(children: children, fuzzies: fuzzies)
+        expect(children.each(&:reload).map(&:updated_at)).to eq [new_time, new_time] # touch: true
+        expect(fuzzies.each(&:reload).map(&:updated_at)).to eq [old_time, old_time] # touch: nil
+      end
+
+      it "touches removed associated records" do
+        peter, paul, mary = Child.create!, Child.create!, Child.create!
+        parent = Parent.create!(children: [peter, paul, mary])
+        [peter, paul, mary].each { |child| child.update_column :updated_at, old_time }
+        parent.update!(children: [peter, paul])
+        expect([peter, paul, mary].each(&:reload).map(&:updated_at)).to eq [new_time, new_time, new_time]
       end
     end
 

@@ -24,7 +24,14 @@ module ActiveRecord
 
       if touch
         after_commit do
-          scope = send(many)
+          if respond_to?(:saved_changes)
+            old_ids, new_ids = saved_changes[one_ids.to_s]
+          else
+            old_ids, new_ids = previous_changes[one_ids.to_s]
+          end
+          ids = Array(old_ids) | Array(new_ids)
+          scope = class_name.constantize.where(self.class.primary_key => ids)
+
           if scope.respond_to?(:touch) # AR 6.0+
             scope.touch_all
           elsif self.class.respond_to?(:touch_attributes_with_time) # AR 5.1+
