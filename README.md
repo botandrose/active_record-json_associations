@@ -49,6 +49,8 @@ Or any of specified array of ids:
 Parent.child_ids_including([2,4,5]) # => [<Parent child_ids: [1,2,3]>]
 ```
 
+`touch: true` can be specified on belongs_to_many to touch the associated records' timestamps when the record is modified.
+
 It also adds an `json_foreign_key` option to `has_many` for specifying that the foreign keys are in a json array.
 
 ```ruby

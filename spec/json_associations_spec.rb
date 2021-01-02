@@ -9,16 +9,21 @@ describe ActiveRecord::JsonAssociations do
         create_table :parents do |t|
           t.text :child_ids
           t.text :fuzzy_ids
+          t.timestamps
         end
 
-        create_table :children
+        create_table :children do |t|
+          t.timestamps
+        end
 
-        create_table :pets
+        create_table :pets do |t|
+          t.timestamps
+        end
       end
     end
 
     class Parent < ActiveRecord::Base
-      belongs_to_many :children
+      belongs_to_many :children, touch: true
       belongs_to_many :fuzzies, class_name: "Pet"
     end
 
@@ -127,6 +132,27 @@ describe ActiveRecord::JsonAssociations do
         it "the other at the end of the json array" do
           parent = Parent.create(children: [Child.create!, paul])
           expect(Parent.child_ids_including(any: [peter.id, paul.id])).to eq [parent]
+        end
+      end
+    end
+
+    describe "touch: true" do
+      around do |example|
+        old_zone = Time.zone
+        Time.zone = "UTC"
+        example.run
+        Time.zone = old_zone
+      end
+
+      it "touches associated records when touch option is true" do
+        old_time = 1.year.ago.round
+        new_time = 1.second.ago.round
+        Timecop.freeze(new_time) do
+          children = [Child.create!(updated_at: old_time), Child.create!(updated_at: old_time)]
+          fuzzies = [Pet.create!(updated_at: old_time), Pet.create!(updated_at: old_time)]
+          parent = Parent.create!(children: children, fuzzies: fuzzies)
+          expect(children.each(&:reload).map(&:updated_at)).to eq [new_time, new_time]
+          expect(fuzzies.each(&:reload).map(&:updated_at)).to eq [old_time, old_time]
         end
       end
     end

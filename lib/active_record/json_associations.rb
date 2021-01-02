@@ -11,7 +11,7 @@ module ActiveRecord
     end
     private_constant :FIELD_INCLUDE_SCOPE_BUILDER_PROC
 
-    def belongs_to_many(many, class_name: nil)
+    def belongs_to_many(many, class_name: nil, touch: nil)
       one = many.to_s.singularize
       one_ids = :"#{one}_ids"
       one_ids_equals = :"#{one_ids}="
@@ -21,6 +21,12 @@ module ActiveRecord
       class_name ||= one.classify
 
       serialize one_ids, JSON
+
+      if touch
+        after_commit do
+          send(many).touch_all
+        end
+      end
 
       extend Module.new {
         define_method :"#{one_ids}_including" do |id|

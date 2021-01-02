@@ -1,4 +1,5 @@
 require "byebug"
+require "timecop"
 
 RSpec.configure do |config|
   config.filter_run focus: true
