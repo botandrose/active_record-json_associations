@@ -24,7 +24,17 @@ module ActiveRecord
 
       if touch
         after_commit do
-          send(many).touch_all
+          scope = send(many)
+          if scope.respond_to?(:touch) # AR 6.0+
+            scope.touch_all
+          elsif self.class.respond_to?(:touch_attributes_with_time) # AR 5.1+
+            scope.update_all self.class.touch_attributes_with_time
+          else # AR 5.0
+            attributes = timestamp_attributes_for_update_in_model.inject({}) do |attributes, key|
+              attributes.merge(key => current_time_from_proper_timezone)
+            end
+            scope.update_all attributes
+          end
         end
       end
 
