@@ -168,6 +168,14 @@ describe ActiveRecord::JsonAssociations do
         parent.update!(children: [peter, paul])
         expect([peter, paul, mary].each(&:reload).map(&:updated_at)).to eq [new_time, new_time, new_time]
       end
+
+      it "touches added associated records" do
+        peter, paul, mary = Child.create!, Child.create!, Child.create!
+        parent = Parent.create!(children: [peter, paul])
+        [peter, paul, mary].each { |child| child.update_column :updated_at, old_time }
+        parent.update!(children: [peter, paul, mary])
+        expect([peter, paul, mary].each(&:reload).map(&:updated_at)).to eq [new_time, new_time, new_time]
+      end
     end
 
     describe "#child_ids" do
