@@ -153,12 +153,20 @@ describe ActiveRecord::JsonAssociations do
         end
       end
 
-      it "touches associated records" do
+      it "touches records associated upon creation" do
         children = [Child.create!(updated_at: old_time), Child.create!(updated_at: old_time)]
         fuzzies = [Pet.create!(updated_at: old_time), Pet.create!(updated_at: old_time)]
         parent = Parent.create!(children: children, fuzzies: fuzzies)
         expect(children.each(&:reload).map(&:updated_at)).to eq [new_time, new_time] # touch: true
         expect(fuzzies.each(&:reload).map(&:updated_at)).to eq [old_time, old_time] # touch: nil
+      end
+
+      it "touches exising association records" do
+        children = [Child.create!, Child.create!]
+        parent = Parent.create!(children: children)
+        children.each { |child| child.update!(updated_at: old_time) }
+        parent.save!
+        expect(children.each(&:reload).map(&:updated_at)).to eq [new_time, new_time]
       end
 
       it "touches removed associated records" do
