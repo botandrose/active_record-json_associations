@@ -105,8 +105,12 @@ module ActiveRecord
       one_ids_equals = :"#{one_ids}="
       many_equals = :"#{many}="
       many_eh = :"#{many}?"
+      build_one = :"build_#{one}"
+      create_one = :"create_#{one}"
+      create_one_bang = :"create_#{one}!"
 
       class_name = options[:class_name] || one.classify
+      klass = class_name.constantize
 
       foreign_key = options[:json_foreign_key]
       foreign_key = :"#{model_name.singular}_ids" if foreign_key == true
@@ -117,13 +121,11 @@ module ActiveRecord
         end
 
         define_method one_ids_equals do |ids|
-          klass = class_name.constantize
           normalized_ids = Array(ids).select(&:present?).map(&:to_i)
           send many_equals, klass.find(normalized_ids)
         end
 
         define_method many do
-          klass = class_name.constantize
           FIELD_INCLUDE_SCOPE_BUILDER_PROC.call(klass, foreign_key, id)
         end
 
@@ -137,6 +139,18 @@ module ActiveRecord
 
         define_method many_eh do
           send(many).any?
+        end
+
+        define_method build_one do |attributes={}|
+          klass.new attributes.merge!(foreign_key => [id])
+        end
+
+        define_method create_one do |attributes={}|
+          klass.create attributes.merge!(foreign_key => [id])
+        end
+
+        define_method create_one_bang do |attributes={}|
+          klass.create! attributes.merge!(foreign_key => [id])
         end
       }
     end

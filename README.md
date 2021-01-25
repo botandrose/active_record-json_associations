@@ -63,6 +63,18 @@ parent = Parent.create children: [child]
 child.parents == [parent] #=> true
 ```
 
+I can't figure out how to support building records off the association, so instead there are the `has_one`/`belongs_to` builder methods:
+
+```ruby
+child.build_parent
+child.create_parent
+child.create_parent!
+
+# also supports optional attributes:
+
+child.build_parent(name: "Momma")
+```
+
 ## Requirements
 
 * ActiveRecord 5.0+

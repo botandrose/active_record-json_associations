@@ -7,6 +7,7 @@ describe ActiveRecord::JsonAssociations do
     silence_stream(STDOUT) do
       ActiveRecord::Schema.define do
         create_table :parents do |t|
+          t.string :name
           t.text :child_ids
           t.text :fuzzy_ids
           t.timestamps
@@ -344,6 +345,67 @@ describe ActiveRecord::JsonAssociations do
       it "returns true when there are parents" do
         subject.parents = parents
         expect(subject.parents?).to be_truthy
+      end
+    end
+
+    describe "#build_parent" do
+      it "doesnt save the record" do
+        parent = subject.build_parent
+        expect(parent).to be_new_record
+      end
+
+      it "sets the foreign key column" do
+        parent = subject.build_parent
+        expect(parent.children).to eq([subject])
+      end
+
+      it "passes attributes through" do
+        parent = subject.build_parent(name: "Parent")
+        expect(parent.name).to eq("Parent")
+      end
+    end
+
+    describe "#create_parent" do
+      it "saves the record" do
+        parent = subject.create_parent
+        expect(parent).to be_persisted
+      end
+
+      it "sets the foreign key column" do
+        parent = subject.create_parent
+        expect(parent.children).to eq([subject])
+      end
+
+      it "passes attributes through" do
+        parent = subject.create_parent(name: "Parent")
+        expect(parent.name).to eq("Parent")
+      end
+
+      it "calls create on the model" do
+        expect(Parent).to receive(:create)
+        subject.create_parent
+      end
+    end
+
+    describe "#create_parent!" do
+      it "saves the record" do
+        parent = subject.create_parent!
+        expect(parent).to be_persisted
+      end
+
+      it "sets the foreign key column" do
+        parent = subject.create_parent!
+        expect(parent.children).to eq([subject])
+      end
+
+      it "passes attributes through" do
+        parent = subject.create_parent!(name: "Parent")
+        expect(parent.name).to eq("Parent")
+      end
+
+      it "calls create! on the model" do
+        expect(Parent).to receive(:create!)
+        subject.create_parent!
       end
     end
   end
