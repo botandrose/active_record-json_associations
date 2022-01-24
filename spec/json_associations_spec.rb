@@ -185,6 +185,14 @@ describe ActiveRecord::JsonAssociations do
         parent.update!(children: [peter, paul, mary])
         expect([peter, paul, mary].each(&:reload).map(&:updated_at)).to eq [new_time, new_time, new_time]
       end
+
+      it "skips touching if in a .no_touching block" do
+        children = [Child.create!, Child.create!]
+        parent = Parent.create!(children: children)
+        children.each { |child| child.update!(updated_at: old_time) }
+        ActiveRecord::Base.no_touching { parent.save! }
+        expect(children.each(&:reload).map(&:updated_at)).to eq [old_time, old_time]
+      end
     end
 
     describe "#child_ids" do

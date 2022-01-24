@@ -24,20 +24,22 @@ module ActiveRecord
 
       if touch
         after_commit do
-          method = respond_to?(:saved_changes) ? :saved_changes : :previous_changes
-          old_ids, new_ids = send(method)[one_ids.to_s]
-          ids = Array(send(one_ids)) | Array(old_ids) | Array(new_ids)
-          scope = class_name.constantize.where(self.class.primary_key => ids)
+          unless no_touching?
+            method = respond_to?(:saved_changes) ? :saved_changes : :previous_changes
+            old_ids, new_ids = send(method)[one_ids.to_s]
+            ids = Array(send(one_ids)) | Array(old_ids) | Array(new_ids)
+            scope = class_name.constantize.where(self.class.primary_key => ids)
 
-          if scope.respond_to?(:touch) # AR 6.0+
-            scope.touch_all
-          elsif self.class.respond_to?(:touch_attributes_with_time) # AR 5.1+
-            scope.update_all self.class.touch_attributes_with_time
-          else # AR 5.0
-            attributes = timestamp_attributes_for_update_in_model.inject({}) do |attributes, key|
-              attributes.merge(key => current_time_from_proper_timezone)
+            if scope.respond_to?(:touch) # AR 6.0+
+              scope.touch_all
+            elsif self.class.respond_to?(:touch_attributes_with_time) # AR 5.1+
+              scope.update_all self.class.touch_attributes_with_time
+            else # AR 5.0
+              attributes = timestamp_attributes_for_update_in_model.inject({}) do |attributes, key|
+                attributes.merge(key => current_time_from_proper_timezone)
+              end
+              scope.update_all attributes
             end
-            scope.update_all attributes
           end
         end
       end
