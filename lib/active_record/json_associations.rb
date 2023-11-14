@@ -20,7 +20,12 @@ module ActiveRecord
 
       class_name ||= one.classify
 
-      serialize one_ids, JSON
+
+      if ActiveRecord.version >= Gem::Version.new("7.1")
+        serialize one_ids, coder: JSON
+      else
+        serialize one_ids, JSON
+      end
 
       if touch
         after_commit do
