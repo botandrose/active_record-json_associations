@@ -4,10 +4,16 @@ require "json"
 module ActiveRecord
   module JsonAssociations
     FIELD_INCLUDE_SCOPE_BUILDER_PROC = proc do |context, field, id|
-      context.where("#{field}='[#{id}]'").or(
-        context.where("#{field} LIKE '[#{id},%'")).or(
-          context.where("#{field} LIKE '%,#{id},%'")).or(
-            context.where("#{field} LIKE '%,#{id}]'"))
+      using_json = context.columns_hash[field.to_s].type == :json
+
+      if using_json
+        context.where("JSON_CONTAINS(#{field}, ?, '$')", id.to_json)
+      else
+        context.where("#{field}='[#{id}]'").or(
+          context.where("#{field} LIKE '[#{id},%'")).or(
+            context.where("#{field} LIKE '%,#{id},%'")).or(
+              context.where("#{field} LIKE '%,#{id}]'"))
+      end
     end
     private_constant :FIELD_INCLUDE_SCOPE_BUILDER_PROC
 
@@ -20,11 +26,14 @@ module ActiveRecord
 
       class_name ||= one.classify
 
+      using_json = columns_hash[one_ids.to_s].type == :json
 
-      if ActiveRecord.version >= Gem::Version.new("7.1")
-        serialize one_ids, coder: JSON
-      else
-        serialize one_ids, JSON
+      if !using_json
+        if ActiveRecord.version >= Gem::Version.new("7.1")
+          serialize one_ids, coder: JSON
+        else
+          serialize one_ids, JSON
+        end
       end
 
       if touch
