@@ -79,7 +79,7 @@ module ActiveRecord
         end
 
         define_method one_ids_equals do |ids|
-          super Array(ids).select(&:present?).map(&:to_i)
+          super Array(ids).select(&:present?).map(&:to_i).uniq
         end
 
         define_method many do
@@ -137,7 +137,7 @@ module ActiveRecord
         end
 
         define_method one_ids_equals do |ids|
-          normalized_ids = Array(ids).select(&:present?).map(&:to_i)
+          normalized_ids = Array(ids).select(&:present?).map(&:to_i).uniq
           send many_equals, klass.find(normalized_ids)
         end
 
