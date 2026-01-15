@@ -37,16 +37,16 @@ parent.child_ids #=> [1,2]
 parent.children? #=> true
 ```
 
-And a scope method for finding records assocatied with an id:
+And a scope method for finding records associated with an id:
 
 ```ruby
 Parent.child_ids_including(2) # => [<Parent child_ids: [1,2,3]>]
 ```
 
-Or any of specified array of ids:
+Or any of a specified array of ids:
 
 ```ruby
-Parent.child_ids_including([2,4,5]) # => [<Parent child_ids: [1,2,3]>]
+Parent.child_ids_including(any: [2,4,5]) # => [<Parent child_ids: [1,2,3]>]
 ```
 
 `touch: true` can be specified on belongs_to_many to touch the associated records' timestamps when the record is modified.
@@ -77,7 +77,8 @@ child.build_parent(name: "Momma")
 
 ## Requirements
 
-* ActiveRecord 5.0+
+* Ruby 3.2+
+* ActiveRecord 7.2+
 
 ## Contributing
 
