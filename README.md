@@ -1,7 +1,6 @@
 # ActiveRecord::JsonAssociations
 
 [![CI Status](https://github.com/botandrose/active_record-json_associations/actions/workflows/ci.yml/badge.svg)](https://github.com/botandrose/active_record-json_associations/actions/workflows/ci.yml)
-[![Code Climate](https://codeclimate.com/github/botandrose/active_record-json_associations/badges/gpa.svg)](https://codeclimate.com/github/botandrose/active_record-json_associations)
 
 Instead of keeping the foreign keys on the children, or in a many-to-many join table, let's keep them in a JSON array on the parent.
 
