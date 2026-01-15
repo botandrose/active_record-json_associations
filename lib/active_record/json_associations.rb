@@ -5,6 +5,26 @@ require "json"
 
 module ActiveRecord
   module JsonAssociations
+    ORDER_BY_IDS_PROC = proc do |scope, ids|
+      if ids.empty?
+        scope
+      else
+        pk = scope.klass.primary_key
+        quoted_ids = ids.map { |id| scope.connection.quote(id) }
+        order_sql = case scope.connection.adapter_name
+        when "Mysql2", "Trilogy"
+          "FIELD(#{pk}, #{quoted_ids.join(",")})"
+        when "PostgreSQL"
+          "array_position(ARRAY[#{quoted_ids.join(",")}], #{pk})"
+        else
+          fragments = ids.each_with_index.map { |id, i| "WHEN #{quoted_ids[i]} THEN #{i}" }
+          "CASE #{pk} #{fragments.join(" ")} END"
+        end
+        scope.order!(Arel.sql(order_sql))
+      end
+    end
+    private_constant :ORDER_BY_IDS_PROC
+
     FIELD_INCLUDE_SCOPE_BUILDER_PROC = proc do |context, field, id|
       using_json = context.columns_hash[field.to_s].type == :json
       sanitized_id = id.to_i
@@ -69,22 +89,9 @@ module ActiveRecord
 
         define_method many do
           klass = class_name.constantize
-          scope = klass.all
-
           ids = send(one_ids).map(&:to_i)
-          scope.where!(klass.primary_key => ids)
-
-          if ids.any?
-            pk = klass.arel_table[klass.primary_key]
-            order_clause = Arel::Nodes::Case.new.tap do |order_case|
-              ids.each_with_index do |id, index|
-                order_case.when(pk.eq(id)).then(index)
-              end
-            end
-            scope.order!(order_clause)
-          end
-
-          scope
+          scope = klass.where(klass.primary_key => ids)
+          ORDER_BY_IDS_PROC.call(scope, ids)
         end
 
         define_method many_equals do |collection|
