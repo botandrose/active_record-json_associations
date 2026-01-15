@@ -12,7 +12,7 @@ require "active_record/json_associations"
 
 ActiveRecord::Schema.define do
   create_table :parents do |t|
-    t.text :child_ids
+    t.json :child_ids, default: []
   end
 
   create_table :children
@@ -22,6 +22,8 @@ class Parent < ActiveRecord::Base
   belongs_to_many :children
 end
 ```
+
+**Note:** The `child_ids` column must be a native JSON type. Text columns are not supported.
 
 This will add some familiar `has_many`-style methods:
 
@@ -79,6 +81,7 @@ child.build_parent(name: "Momma")
 
 * Ruby 3.2+
 * ActiveRecord 7.2+
+* Database with JSON column support (MySQL, PostgreSQL, SQLite 3.9+)
 
 ## Contributing
 

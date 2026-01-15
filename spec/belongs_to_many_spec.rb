@@ -8,8 +8,8 @@ describe ActiveRecord::JsonAssociations do
       ActiveRecord::Schema.define do
         create_table :parents, force: true do |t|
           t.string :name
-          t.text :child_ids
-          t.text :fuzzy_ids
+          t.json :child_ids, default: []
+          t.json :fuzzy_ids, default: []
           t.timestamps
         end
 

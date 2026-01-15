@@ -26,16 +26,19 @@ module ActiveRecord
     private_constant :ORDER_BY_IDS_PROC
 
     FIELD_INCLUDE_SCOPE_BUILDER_PROC = proc do |context, field, id|
-      using_json = context.columns_hash[field.to_s].type == :json
+      unless context.columns_hash[field.to_s].type == :json
+        raise ArgumentError, "#{field} column must be of type :json"
+      end
+
       sanitized_id = id.to_i
 
-      if using_json
+      case context.connection.adapter_name
+      when "Mysql2", "Trilogy"
         context.where("JSON_CONTAINS(#{field}, ?, '$')", sanitized_id.to_json)
+      when "PostgreSQL"
+        context.where("#{field}::jsonb @> ?::jsonb", [sanitized_id].to_json)
       else
-        context.where("#{field} = ?", "[#{sanitized_id}]").or(
-          context.where("#{field} LIKE ?", "[#{sanitized_id},%")).or(
-            context.where("#{field} LIKE ?", "%,#{sanitized_id},%")).or(
-              context.where("#{field} LIKE ?", "%,#{sanitized_id}]"))
+        context.where("EXISTS (SELECT 1 FROM json_each(#{field}) WHERE value = ?)", sanitized_id)
       end
     end
     private_constant :FIELD_INCLUDE_SCOPE_BUILDER_PROC
@@ -49,9 +52,9 @@ module ActiveRecord
 
       class_name ||= one.classify
 
-      using_json = columns_hash[one_ids.to_s].type == :json
-
-      serialize one_ids, coder: JSON unless using_json
+      unless columns_hash[one_ids.to_s].type == :json
+        raise ArgumentError, "#{one_ids} column must be of type :json"
+      end
 
       if touch
         after_commit do
