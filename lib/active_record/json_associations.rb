@@ -7,14 +7,15 @@ module ActiveRecord
   module JsonAssociations
     FIELD_INCLUDE_SCOPE_BUILDER_PROC = proc do |context, field, id|
       using_json = context.columns_hash[field.to_s].type == :json
+      sanitized_id = id.to_i
 
       if using_json
-        context.where("JSON_CONTAINS(#{field}, ?, '$')", id.to_json)
+        context.where("JSON_CONTAINS(#{field}, ?, '$')", sanitized_id.to_json)
       else
-        context.where("#{field}='[#{id}]'").or(
-          context.where("#{field} LIKE '[#{id},%'")).or(
-            context.where("#{field} LIKE '%,#{id},%'")).or(
-              context.where("#{field} LIKE '%,#{id}]'"))
+        context.where("#{field} = ?", "[#{sanitized_id}]").or(
+          context.where("#{field} LIKE ?", "[#{sanitized_id},%")).or(
+            context.where("#{field} LIKE ?", "%,#{sanitized_id},%")).or(
+              context.where("#{field} LIKE ?", "%,#{sanitized_id}]"))
       end
     end
     private_constant :FIELD_INCLUDE_SCOPE_BUILDER_PROC
