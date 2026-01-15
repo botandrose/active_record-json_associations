@@ -31,32 +31,14 @@ module ActiveRecord
 
       using_json = columns_hash[one_ids.to_s].type == :json
 
-      if !using_json
-        if ActiveRecord.version >= Gem::Version.new("7.1")
-          serialize one_ids, coder: JSON
-        else
-          serialize one_ids, JSON
-        end
-      end
+      serialize one_ids, coder: JSON unless using_json
 
       if touch
         after_commit do
           unless no_touching?
-            method = respond_to?(:saved_changes) ? :saved_changes : :previous_changes
-            old_ids, new_ids = send(method)[one_ids.to_s]
+            old_ids, new_ids = saved_changes[one_ids.to_s]
             ids = Array(send(one_ids)) | Array(old_ids) | Array(new_ids)
-            scope = class_name.constantize.where(self.class.primary_key => ids)
-
-            if scope.respond_to?(:touch) # AR 6.0+
-              scope.touch_all
-            elsif self.class.respond_to?(:touch_attributes_with_time) # AR 5.1+
-              scope.update_all self.class.touch_attributes_with_time
-            else # AR 5.0
-              attributes = timestamp_attributes_for_update_in_model.inject({}) do |attributes, key|
-                attributes.merge(key => current_time_from_proper_timezone)
-              end
-              scope.update_all attributes
-            end
+            class_name.constantize.where(self.class.primary_key => ids).touch_all
           end
         end
       end
