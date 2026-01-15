@@ -87,6 +87,14 @@ describe ActiveRecord::JsonAssociations do
         expect(subject.parents).to eq parents
       end
 
+      it "defers assignment until after create for new records" do
+        child = Child.new
+        child.parents = parents
+        expect(parents.map { |p| p.reload.child_ids }).to eq [[], [], []]
+        child.save!
+        expect(parents.map { |p| p.reload.child_ids }).to eq [[child.id], [child.id], [child.id]]
+      end
+
       context "finds records with the specified id" do
         let(:child) { Child.create! }
 

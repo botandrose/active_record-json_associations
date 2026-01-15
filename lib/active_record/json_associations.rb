@@ -131,6 +131,15 @@ module ActiveRecord
       foreign_key = options[:json_foreign_key]
       foreign_key = :"#{model_name.singular}_ids" if foreign_key == true
 
+      pending_associations_var = :"@pending_#{many}"
+
+      after_create do
+        if (pending = instance_variable_get(pending_associations_var))
+          instance_variable_set(pending_associations_var, nil)
+          send(many_equals, pending)
+        end
+      end
+
       include Module.new {
         define_method one_ids do
           send(many).pluck(:id)
@@ -148,10 +157,13 @@ module ActiveRecord
         end
 
         define_method many_equals do |collection|
-          collection.each do |record|
-            new_id_array = Array(record.send(foreign_key)) | [id]
-            raise "FIXME: Cannot assign during creation, because no id has yet been reified." if new_id_array.any?(&:nil?)
-            record.update foreign_key => new_id_array
+          if new_record?
+            instance_variable_set(pending_associations_var, collection)
+          else
+            collection.each do |record|
+              new_id_array = Array(record.send(foreign_key)) | [id]
+              record.update foreign_key => new_id_array
+            end
           end
         end
 
