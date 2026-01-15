@@ -1,6 +1,14 @@
 require "byebug"
 require "timecop"
 
+def database_config
+  if ENV["DATABASE_URL"]
+    { url: ENV["DATABASE_URL"] }
+  else
+    { adapter: "sqlite3", database: ":memory:" }
+  end
+end
+
 RSpec.configure do |config|
   config.filter_run focus: true
   config.run_all_when_everything_filtered = true

@@ -2,22 +2,22 @@ require "active_record/json_associations"
 
 describe ActiveRecord::JsonAssociations do
   before do
-    ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
+    ActiveRecord::Base.establish_connection database_config
 
     silence_stream(STDOUT) do
       ActiveRecord::Schema.define do
-        create_table :parents do |t|
+        create_table :parents, force: true do |t|
           t.string :name
           t.text :child_ids
           t.text :fuzzy_ids
           t.timestamps
         end
 
-        create_table :children do |t|
+        create_table :children, force: true do |t|
           t.timestamps
         end
 
-        create_table :pets do |t|
+        create_table :pets, force: true do |t|
           t.timestamps
         end
       end

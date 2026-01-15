@@ -71,14 +71,20 @@ module ActiveRecord
           klass = class_name.constantize
           scope = klass.all
 
-          ids = send(one_ids)
+          ids = send(one_ids).map(&:to_i)
           scope.where!(klass.primary_key => ids)
 
-          fragments = []
-          fragments += ["#{klass.primary_key} NOT IN (#{ids.map(&:to_s).join(",")})"] if ids.any?
-          fragments += ids.reverse.map { |id| "#{klass.primary_key}=#{id}" }
-          order_by_ids = fragments.join(", ")
-          scope.order!(Arel.sql(order_by_ids))
+          if ids.any?
+            pk = klass.arel_table[klass.primary_key]
+            order_clause = Arel::Nodes::Case.new.tap do |order_case|
+              ids.each_with_index do |id, index|
+                order_case.when(pk.eq(id)).then(index)
+              end
+            end
+            scope.order!(order_clause)
+          end
+
+          scope
         end
 
         define_method many_equals do |collection|
