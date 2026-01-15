@@ -10,7 +10,6 @@ describe ActiveRecord::JsonAssociations do
           t.string :name
           t.text :child_ids
           t.text :fuzzy_ids
-          t.json :dependent_types_and_ids
           t.timestamps
         end
 
